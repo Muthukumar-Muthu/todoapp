@@ -120,7 +120,8 @@ button {
   display: flex;
 }
 .delete,
-.edit {
+.edit,
+.pin {
   padding: 5px 20px;
   color: white;
   border-radius: 5px;
@@ -134,6 +135,25 @@ button {
   background-color: rgb(211, 5, 5);
 }
 .edit {
+  background-color: #3f72af;
+}
+.pin {
+  background-color: #464545;
+}
+.wrapper {
+  position: relative;
+}
+.pin-icon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: x-large;
+
+  padding: 2px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.pin-icon:hover {
   background-color: #3f72af;
 }
 @media (max-width: 615px) {

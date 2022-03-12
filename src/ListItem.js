@@ -1,8 +1,47 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { EditForm } from "./EditForm";
-const ListItem = ({ task, deleteHandler, editHandler, id, saveTask }) => {
+import { AiFillPushpin, AiOutlinePushpin } from "react-icons/ai";
+import { Timestamp } from "firebase/firestore";
+const ListItem = ({ task, pinned, deleteHandler, id, saveTask, timeStamp }) => {
   const [edit, setEdit] = useState(false);
-  console.log(edit);
+  const [date, setDate] = useState("");
+  useEffect(() => {
+    async function g() {
+      const month = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+      function padZeroes(num) {
+        if (num < 10) return `0${num}`;
+        return num;
+      }
+      const res = new Timestamp(timeStamp.seconds, timeStamp.nanoseconds);
+      const date = await res.toDate();
+      setDate(
+        `${padZeroes(date.getDate())}, ${month[date.getMonth()].substring(
+          0,
+          3
+        )} ${date.getFullYear()} (${padZeroes(date.getHours())}:${padZeroes(
+          date.getMinutes()
+        )})`
+      );
+    }
+    g();
+  }, []);
+
+  function pin(id) {
+    saveTask(task, !pinned, id);
+  }
   return (
     <div className="list-item">
       {edit ? (
@@ -14,6 +53,23 @@ const ListItem = ({ task, deleteHandler, editHandler, id, saveTask }) => {
         />
       ) : (
         <div className="wrapper">
+          {pinned ? (
+            <AiFillPushpin
+              title="Unpin this task"
+              className="pin-icon"
+              onClick={() => {
+                pin(id);
+              }}
+            />
+          ) : (
+            <AiOutlinePushpin
+              title="Pin this task"
+              className="pin-icon"
+              onClick={() => {
+                pin(id);
+              }}
+            />
+          )}
           <div>{task}</div>
           <div className="grp">
             <span
@@ -27,15 +83,18 @@ const ListItem = ({ task, deleteHandler, editHandler, id, saveTask }) => {
             <span
               className="edit"
               onClick={() => {
-                editHandler(id);
                 setEdit((p) => !p);
               }}
             >
               Edit
             </span>
+            <span className="pin">{`${
+              pinned ? "Unpin" : "Pin"
+            } this task`}</span>
           </div>
         </div>
       )}
+      <div>Last edited : {date}</div>
     </div>
   );
 };

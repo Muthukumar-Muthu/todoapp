@@ -1,19 +1,21 @@
 import ListItem from "./ListItem";
-const List = ({ tasks, deleteHandler, editHandler, setText, saveTask }) => {
-  console.log(tasks);
+const List = ({ tasks, deleteHandler, setText, saveTask }) => {
+  const sortedTask = tasks.sort((task1, task2) => task1.pinned < task2.pinned);
+  console.log(sortedTask);
   return (
     <div className="list">
       {tasks.length === 0
         ? "No task to complete!!! Enjoy yourself buddy😎"
-        : tasks.map((task) => (
+        : sortedTask.map((task) => (
             <ListItem
               key={task.id}
               id={task.id}
               task={task.task}
               deleteHandler={deleteHandler}
-              editHandler={editHandler}
               setText={setText}
               saveTask={saveTask}
+              pinned={task.pinned}
+              timeStamp={task.timeStamp}
             />
           ))}
     </div>

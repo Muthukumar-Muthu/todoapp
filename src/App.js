@@ -22,21 +22,23 @@ function App() {
   const [text, setText] = useState("");
   const [tasks, setTasks] = useState([]);
   const [user, setUser] = useState(false);
-
+  const [loading, setLoading] = useState(false);
   function formSubmit(e) {
+    setLoading(true);
     e.preventDefault();
     saveTask(text);
 
     //clearing input field
     setText("");
   }
-  async function saveTask(text, id) {
+  async function saveTask(text, pinned = false, id) {
     if (id) {
       //for editing the doc
       try {
         await setDoc(doc(db, "tasks", id), {
           timeStamp: serverTimestamp(),
           task: text,
+          pinned,
         });
       } catch (e) {
         console.log(e);
@@ -47,6 +49,7 @@ function App() {
         await addDoc(colRef, {
           timeStamp: serverTimestamp(),
           task: text,
+          pinned,
         });
       } catch (e) {
         console.log(e);
@@ -54,32 +57,37 @@ function App() {
     }
   }
   async function getTasks() {
-    const q = query(colRef, orderBy("timeStamp", "desc"));
-    const querySnapShot = await getDocs(q);
-    const listItems = [];
-    querySnapShot.forEach((doc) => {
-      listItems.push({
-        id: doc.id,
-        task: doc.data().task,
+    setTasks([]);
+    try {
+      const q = query(colRef, orderBy("timeStamp", "desc"));
+      const querySnapShot = await getDocs(q);
+      const listItems = [];
+      querySnapShot.forEach((doc) => {
+        listItems.push({
+          id: doc.id,
+          ...doc.data(),
+        });
       });
-    });
-    setTasks(listItems);
+      setTasks(listItems);
+    } catch (e) {
+      console.log(e);
+    }
   }
   async function deleteHandler(key) {
     await deleteDoc(doc(db, "tasks", key));
   }
-  function editHandler(key) {
-    console.log(key);
-  }
+
   return (
     <div className="App">
-      {!user ? (
+      {user ? ( //TODO: CHECK THIS
         <Login setUser={setUser} />
       ) : (
         <>
           <Header
-            name={getAuth().currentUser.displayName}
-            profileUrl={getAuth().currentUser.photoURL}
+            // name={getAuth().currentUser.displayName}
+            // profileUrl={getAuth().currentUser.photoURL}
+            name="Muthukumar"
+            profileUrl={null}
           />
           <Form text={text} submitHandler={formSubmit} setText={setText} />
           <div className="line"></div>
@@ -89,7 +97,6 @@ function App() {
           <List
             tasks={tasks}
             deleteHandler={deleteHandler}
-            editHandler={editHandler}
             saveTask={saveTask}
           />
         </>
@@ -102,6 +109,5 @@ export default App;
 /*
 TODO:
 rules
-add time stamp to ui
-
+snapshot 
 */
