@@ -3,7 +3,8 @@ export const EditForm = ({ setEdit, inputValue, saveTask, id }) => {
   const [text, setText] = useState(inputValue);
   function submitHandler(e) {
     e.preventDefault();
-    console.log(text);
+    console.log(text, id);
+
     saveTask(text, id);
     setEdit((p) => !p);
   }

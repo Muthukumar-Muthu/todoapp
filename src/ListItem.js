@@ -2,45 +2,38 @@ import { useState, useEffect } from "react";
 import { EditForm } from "./EditForm";
 import { AiFillPushpin, AiOutlinePushpin } from "react-icons/ai";
 import { Timestamp } from "firebase/firestore";
+import moment from "moment";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "./firebase-config";
 const ListItem = ({ task, pinned, deleteHandler, id, saveTask, timeStamp }) => {
   const [edit, setEdit] = useState(false);
   const [date, setDate] = useState("");
+
   useEffect(() => {
     async function g() {
-      const month = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-      ];
-      function padZeroes(num) {
-        if (num < 10) return `0${num}`;
-        return num;
+      let date = {};
+      if (timeStamp === null) {
+        date = new Date();
+        console.log(task, timeStamp, date);
+        // const docRef = doc(db, "tasks", id);
+        // const docSnap = await getDoc(docRef);
+        // console.log(docSnap.data());
+      } else {
+        try {
+          const res = new Timestamp(timeStamp.seconds, timeStamp.nanoseconds);
+          date = res.toDate();
+        } catch (error) {
+          setDate("loading..");
+          console.log(error);
+        }
       }
-      const res = new Timestamp(timeStamp.seconds, timeStamp.nanoseconds);
-      const date = await res.toDate();
-      setDate(
-        `${padZeroes(date.getDate())}, ${month[date.getMonth()].substring(
-          0,
-          3
-        )} ${date.getFullYear()} (${padZeroes(date.getHours())}:${padZeroes(
-          date.getMinutes()
-        )})`
-      );
+      setDate(moment(date).format("LLL"));
     }
     g();
   }, []);
 
   function pin(id) {
-    saveTask(task, !pinned, id);
+    saveTask(task, id, !pinned);
   }
   return (
     <div className="list-item">

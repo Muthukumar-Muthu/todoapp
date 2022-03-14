@@ -1,7 +1,7 @@
 import ListItem from "./ListItem";
 const List = ({ tasks, deleteHandler, setText, saveTask }) => {
   const sortedTask = tasks.sort((task1, task2) => task1.pinned < task2.pinned);
-  console.log(sortedTask);
+
   return (
     <div className="list">
       {tasks.length === 0

@@ -1,5 +1,4 @@
 const Header = ({ name, profileUrl }) => {
-  console.log(profileUrl);
   return (
     <header>
       <div>To Do App</div>

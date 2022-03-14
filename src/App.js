@@ -1,6 +1,6 @@
 import "./App.css";
 import Login from "./Login";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "./Header";
 import Form from "./Form";
 import List from "./List";
@@ -9,12 +9,14 @@ import {
   collection,
   addDoc,
   getDocs,
+  doc,
+  getDoc,
   serverTimestamp,
   orderBy,
   query,
   deleteDoc,
-  doc,
   setDoc,
+  onSnapshot,
 } from "firebase/firestore";
 import { getAuth } from "@firebase/auth";
 function App() {
@@ -23,6 +25,29 @@ function App() {
   const [tasks, setTasks] = useState([]);
   const [user, setUser] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const q = query(colRef, orderBy("timeStamp", "desc"));
+    const unsub = onSnapshot(
+      q,
+      { includeMetadataChanges: true },
+      (snapshot) => {
+        const dummy = [];
+        let i = 0;
+        snapshot.forEach((doc) => {
+          //TODO: fix timestamp
+          dummy.push({ id: doc.id, ...doc.data() });
+          i++;
+        });
+
+        console.log(dummy);
+        setTasks(dummy);
+      }
+    );
+
+    return unsub;
+  }, []);
+
   function formSubmit(e) {
     setLoading(true);
     e.preventDefault();
@@ -31,7 +56,7 @@ function App() {
     //clearing input field
     setText("");
   }
-  async function saveTask(text, pinned = false, id) {
+  async function saveTask(text, id, pinned = false) {
     if (id) {
       //for editing the doc
       try {
@@ -56,23 +81,7 @@ function App() {
       }
     }
   }
-  async function getTasks() {
-    setTasks([]);
-    try {
-      const q = query(colRef, orderBy("timeStamp", "desc"));
-      const querySnapShot = await getDocs(q);
-      const listItems = [];
-      querySnapShot.forEach((doc) => {
-        listItems.push({
-          id: doc.id,
-          ...doc.data(),
-        });
-      });
-      setTasks(listItems);
-    } catch (e) {
-      console.log(e);
-    }
-  }
+
   async function deleteHandler(key) {
     await deleteDoc(doc(db, "tasks", key));
   }
@@ -91,9 +100,7 @@ function App() {
           />
           <Form text={text} submitHandler={formSubmit} setText={setText} />
           <div className="line"></div>
-          <button className="get-tasks" onClick={() => getTasks()}>
-            Get Tasks
-          </button>
+
           <List
             tasks={tasks}
             deleteHandler={deleteHandler}
