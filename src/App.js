@@ -8,9 +8,7 @@ import { db } from "./firebase-config";
 import {
   collection,
   addDoc,
-  getDocs,
   doc,
-  getDoc,
   serverTimestamp,
   orderBy,
   query,
@@ -40,7 +38,6 @@ function App() {
           i++;
         });
 
-        console.log(dummy);
         setTasks(dummy);
       }
     );
