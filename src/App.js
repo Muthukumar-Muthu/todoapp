@@ -16,37 +16,41 @@ import {
   setDoc,
   onSnapshot,
 } from "firebase/firestore";
-import { getAuth } from "@firebase/auth";
+import { getAuth, signOut } from "@firebase/auth";
 function App() {
   const colRef = collection(db, "tasks");
   const [text, setText] = useState("");
   const [tasks, setTasks] = useState([]);
   const [user, setUser] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const q = query(colRef, orderBy("timeStamp", "desc"));
-    const unsub = onSnapshot(
-      q,
-      { includeMetadataChanges: true },
-      (snapshot) => {
-        const dummy = [];
-        let i = 0;
-        snapshot.forEach((doc) => {
-          //TODO: fix timestamp
-          dummy.push({ id: doc.id, ...doc.data() });
-          i++;
-        });
+    if (user) {
+      const q = query(
+        collection(db, "users", getUserId(), "tasks"),
+        orderBy("timeStamp", "desc")
+      );
+      const unsub = onSnapshot(
+        q,
+        { includeMetadataChanges: true },
+        (snapshot) => {
+          const dummy = [];
+          let i = 0;
+          snapshot.forEach((doc) => {
+            dummy.push({ id: doc.id, ...doc.data() });
+            i++;
+          });
 
-        setTasks(dummy);
-      }
-    );
+          setTasks(dummy);
+        }
+      );
 
-    return unsub;
-  }, []);
-
+      return unsub;
+    }
+  }, [user]);
+  function getUserId() {
+    return getAuth().currentUser.uid;
+  }
   function formSubmit(e) {
-    setLoading(true);
     e.preventDefault();
     saveTask(text);
 
@@ -57,7 +61,7 @@ function App() {
     if (id) {
       //for editing the doc
       try {
-        await setDoc(doc(db, "tasks", id), {
+        await setDoc(doc(db, "users", getUserId(), "tasks", id), {
           timeStamp: serverTimestamp(),
           task: text,
           pinned,
@@ -68,7 +72,7 @@ function App() {
     } else {
       //for creating a new doc
       try {
-        await addDoc(colRef, {
+        await addDoc(collection(db, "users", getUserId(), "tasks"), {
           timeStamp: serverTimestamp(),
           task: text,
           pinned,
@@ -80,20 +84,22 @@ function App() {
   }
 
   async function deleteHandler(key) {
-    await deleteDoc(doc(db, "tasks", key));
+    await deleteDoc(doc(db, "users", getUserId(), "tasks", key));
   }
-
+  function signOutHandler() {
+    signOut(getAuth());
+    setUser(false);
+  }
   return (
     <div className="App">
-      {user ? ( //TODO: CHECK THIS
+      {!user ? (
         <Login setUser={setUser} />
       ) : (
         <>
           <Header
-            // name={getAuth().currentUser.displayName}
-            // profileUrl={getAuth().currentUser.photoURL}
-            name="Muthukumar"
-            profileUrl={null}
+            name={getAuth().currentUser.displayName}
+            profileUrl={getAuth().currentUser.photoURL}
+            signOutHandler={signOutHandler}
           />
           <Form text={text} submitHandler={formSubmit} setText={setText} />
           <div className="line"></div>
@@ -113,5 +119,5 @@ export default App;
 /*
 TODO:
 rules
-snapshot 
+
 */

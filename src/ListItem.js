@@ -14,9 +14,8 @@ const ListItem = ({ task, pinned, deleteHandler, id, saveTask, timeStamp }) => {
       let date = {};
       if (timeStamp === null) {
         date = new Date();
-        console.log(task, timeStamp, date);
         // const docRef = doc(db, "tasks", id);
-        // const docSnap = await getDoc(docRef);
+        // const docSnap = await getDoc(docRef); TODO: FIX THE TIMESTAMP
         // console.log(docSnap.data());
       } else {
         try {

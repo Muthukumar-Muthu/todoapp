@@ -16,7 +16,7 @@ body {
   display: grid;
   place-items: center;
   background-color: #f9f7f7;
-  min-width: 600px;
+  min-width: 500px;
   margin-top: 70px;
   border-radius: 20px;
   min-height: 200px;
@@ -37,13 +37,15 @@ header {
   letter-spacing: 0em;
   text-align: center;
   margin-block: 20px;
-  position: relative;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
   width: 100%;
 }
+.sign-out {
+  background-color: red;
+}
 .profile {
-  position: absolute;
-  right: 5px;
-  top: 0;
   display: flex;
   align-items: center;
   font-size: medium;
